@@ -1,41 +1,31 @@
-# Compiled Lua sources
-luac.out
+SX_VM_CNONE();
+local Services = {};
+local vim = getvirtualinputmanager and getvirtualinputmanager();
 
-# luarocks build files
-*.src.rock
-*.zip
-*.tar.gz
+function Services:Get(...)
+    local allServices = {};
 
-# Object files
-*.o
-*.os
-*.ko
-*.obj
-*.elf
+    for _, service in next, {...} do
+        table.insert(allServices, self[service]);
+    end
 
-# Precompiled Headers
-*.gch
-*.pch
+    return unpack(allServices);
+end;
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-*.def
-*.exp
+setmetatable(Services, {
+    __index = function(self, p)
+        if (p == 'VirtualInputManager' and vim) then
+            return vim;
+        end;
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+        local service = game:GetService(p);
+        if (p == 'VirtualInputManager') then
+            service.Name = getServerConstant('VirtualInputManager ');
+        end;
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+        rawset(self, p, service);
+        return rawget(self, p);
+    end,
+});
 
+return Services;
